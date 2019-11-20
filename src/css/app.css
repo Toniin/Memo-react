@@ -1,0 +1,12 @@
+/* J'importe la police "Chivo" depuis google fonts */
+@import url('https://fonts.googleapis.com/css?family=Chivo&display=swap');
+
+.app {
+  display: flex;
+  justify-content: center;
+  font-family: 'Chivo', sans-serif;
+}
+
+h1 {
+  text-align: center;
+}

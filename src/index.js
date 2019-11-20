@@ -1,7 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
 import App from './App';
+// serviceWorker permet de faire un lien entre le système d'exploitation 
+// et le navigateur (notification, ...) ==> VOIR LE PWA
 import * as serviceWorker from './serviceWorker';
 
 ReactDOM.render(<App />, document.getElementById('root'));
