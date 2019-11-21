@@ -1,12 +1,16 @@
 import React, { Component } from "react";
-import Nav from "./components/Nav";
 import Fetch from "./services/Fetch";
+import Nav from "./components/Nav";
+import Column from "./components/Column";
 import "./css/app.css";
 
 export class App extends Component {
   // state correspond à this.state
   state = {
-    terms: []
+    // On stocke les termes de la navbar
+    terms: [],
+    // On stocke les colums du terme sélectionné
+    columns: []
   };
 
   // fetch correspond à this.fetch
@@ -40,12 +44,38 @@ export class App extends Component {
     // On récupère le state précédent et on lui donne data (l'objet des terms)
     // React va voir une différence entre le prevState et le state en cours
     // Ce qui va modifier l'état en prenant en compte les modifications réalisées
-    this.setState(prevState => prevState.terms = data)
+    this.setState(prevState => (prevState.terms = data));
   };
 
   // Si failure() sur la méthode getTerms de Fetch
   failureTerms = error => {
     console.log("Erreur sur la réception des termes", error);
+  };
+
+  // On manipule la récupération des cartes de l'utilisateur
+  handleClickTerm = (event, termId, termSelected) => {
+    // On va modifier la propriété "selected" du term cliqué
+    this.setState(prevState => prevState.termSelected = true); // !!! A REFAIRE !!! (copy + setState)
+    console.log(termSelected);
+    
+    // !!! ATTENTION À L'ORDRE DES PARAMÈTRES !!!
+    this.fetch.getCards(this.successCards, this.failureCards, termId);
+  };
+
+  // Si on réussit à récup nos cartes le terme précis
+  successCards = data => {
+    // setState faire une comparaison entre mon state précédent et mon state en cours
+    // Si les deux state sont différents, il va "update" le component
+    // J'injectes à mon state "columns" la data récupérée (objet de mes colonnes)
+    // Le fait d'injecter au state "columns", modifie mon state précédent
+    // et va actualiser uniquement mon state "columns" et mon render()
+    this.setState(prevState => prevState.columns = data);
+    console.log("J'ai réussi à récup tes cartes, je te les montres :", this.state.columns);
+  };
+
+  // En cas d'échec de la récupération des cartes du terme
+  failureCards = () => {
+    console.log("Dans failureCards");
   };
 
   render() {
@@ -54,10 +84,21 @@ export class App extends Component {
     return (
       <div className="app">
         <header>
-          <h1>Memo</h1>
+          <h1 className="text-white bg-primary">Memo</h1>
           {/* Appelle du component Nav */}
-          <Nav terms={terms} />
+          {/* La prop (onClickTerm) a un nom différent de la méthode (handleClickTerm) 
+          pour bien différencier ce qui est la méthode et ce qui est la prop*/}
+          <Nav onClickTerm={this.handleClickTerm} terms={terms} />
         </header>
+        <main className="container-fluid">
+          <div className="row">
+            {this.state.columns.map((column) => {
+              return (
+                <Column key={column.id} column={column}/>
+              )
+            })}
+          </div>
+        </main>
       </div>
     );
   }
