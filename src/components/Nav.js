@@ -4,8 +4,8 @@ import "../css/header-navbar.css";
 class Nav extends Component {
   state = {};
 
-  buttonClasses = (selected) => {
-    const button_classes = selected ? "btn btn-warning" : "btn btn-primary"
+  buttonClasses = selected => {
+    const button_classes = selected ? "btn btn-secondary" : "btn btn-dark";
     return button_classes;
   };
 
@@ -20,7 +20,7 @@ class Nav extends Component {
               key={term.id}
               className={this.buttonClasses(term.selected)}
               // On appelle la prop onClickTerm qui fait référence à la méthode handleClickTerm
-              onClick={(event) => this.props.onClickTerm(event, term.id, term.selected)}
+              onClick={event => this.props.onClickTerm(event, term)}
             >
               {term.name}
             </li>
