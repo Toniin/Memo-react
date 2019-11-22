@@ -80,7 +80,7 @@ class App extends Component {
     // J'injectes à mon state "columns" la data récupérée (objet de mes colonnes)
     // Le fait d'injecter au state "columns", modifie mon state précédent
     // et va actualiser uniquement mon state "columns" et mon render()
-    this.setState(prevState => (prevState.columns = data));
+    this.setState({ columns: data });
     console.log("J'ai réussi à récup tes cartes, je te les montres :");
     console.table(this.state.columns);
   };
@@ -91,39 +91,60 @@ class App extends Component {
   };
 
   // On manipule la modification de la carte cliquée
-  handleEditCard = (event, card) => {
-    console.log("Handle click edit card", card);
+  handleEditCard = (event, columnIndex, cardIndex) => {
+    console.log("Handle click edit card");
 
     // On modifie cardIsEditing en ajoutant l'objet de la carte séléctionnée
-    this.setState(prevState => prevState.cardIsEditing = card)
+    this.setState({
+      cardIsEditing: {
+        columnIndex: columnIndex,
+        cardIndex: cardIndex
+      }
+    });
   };
 
-  // Pour retirer le rechargement du formulaire quand il est submit
+  // Lorsque le formulaire est "submit"
+  // preventDefault => Pour retirer le rechargement du formulaire quand il est submit
   handleSubmit = event => {
     event.preventDefault();
-    alert("Hello world!");
+    console.log("Envoie du formulaire!");
+
+    // AUTRE MANIÈRE POUR setState (copie du state qui est comparé au state)
+    // On fait une copie du state
+    const copy_state = { ...this.state };
+    // On modifie la valeur de la propriété cardIsEditing de la copie du state quand on submit
+    copy_state.cardIsEditing = false;
+    // Le state de cardIsEditing de la copie va être comparé au state de cardIsEditing en cours,
+    // si c'est différent il change le state par sa copie et appellera la méthode render()
+    this.setState(copy_state);
   };
 
   // On change la question à changement de l'input question
-  handleChangeQuestion = event => {
+  handleChangeQuestion = (event, questionReponse) => {
     console.log("Handle question, première carte");
-  };
+    // Je destructure l'objet cardIsEditing pour utiliser plus rapidement ses propriétés
+    const { columnIndex, cardIndex } = this.state.cardIsEditing;
 
-  // On change la réponse à changement de l'input response
-  handleChangeResponse = event => {
-    console.log("Handle réponse, première carte");
+    // UTILISATION DU prevState METTRE LE event.target.value EN DEHORS PUIS UTILISER SA VARIABLE DANS setState
+    // inputValue change à chaque modification de l'input de la question
+    const inputValue = event.target.value;
+    // Modifie le state de la question à chaque entrée
+    this.setState(
+      prevState =>
+        (prevState.columns[columnIndex].cartes[cardIndex][
+          questionReponse
+        ] = inputValue)
+    );
   };
 
   // Méthode qui renvoit un formulaire
   dumpForm = () => {
     // Si cardIsEditing récupère la carte séléctionnée car on veut la modifier, alors on affiche le formulaire
     if (this.state.cardIsEditing) {
-      console.log("Le formulaire s'affiche");
-    } else {
-      console.log("Pas de formulaire affiché");
-    }
-    
-    if (false) {
+      // Je destructure l'objet cardIsEditing pour utiliser plus rapidement ses propriétés
+      const { columnIndex, cardIndex } = this.state.cardIsEditing;
+
+      // On retourne le formulaire quand on à une carte dans cardIsEditing
       return (
         <form action="" onSubmit={this.handleSubmit}>
           {/* Input pour inscrire sa question */}
@@ -132,8 +153,8 @@ class App extends Component {
             <input
               type="text"
               id="question"
-              value={this.state.columns[0].cartes[0].question}
-              onChange={this.handleChangeQuestion}
+              value={this.state.columns[columnIndex].cartes[cardIndex].question}
+              onChange={event => this.handleChangeQuestion(event, "question")}
             />
           </label>
           {/* Input pour inscrire la réponse à la question */}
@@ -142,8 +163,8 @@ class App extends Component {
             <input
               type="text"
               id="response"
-              value={this.state.columns[0].cartes[0].reponse}
-              onChange={this.handleChangeResponse}
+              value={this.state.columns[columnIndex].cartes[cardIndex].reponse}
+              onChange={event => this.handleChangeQuestion(event, "reponse")}
             />
           </label>
           <input type="submit" value="Envoyer" />
@@ -174,8 +195,9 @@ class App extends Component {
                 <Column
                   key={column.id}
                   column={column}
-                  // Fait référence à la méthode "handleClickEditCard"
+                  // onClickEditCard passe en props de Column la RÉFÉRENCE à la méthode "handleEditCard"
                   onClickEditCard={this.handleEditCard}
+                  columnIndex={this.state.columns.indexOf(column)}
                 />
               );
             })}

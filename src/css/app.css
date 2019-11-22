@@ -24,6 +24,7 @@ h1 {
   flex-direction: row;
   flex-wrap: nowrap;
   justify-content: center;
+  align-items: center;
 }
 
 .col-header>button {
@@ -34,6 +35,7 @@ h1 {
 h2 {
   font-size: 1.5rem!important;
   margin: 5px;
+  margin: 0 5px!important;
 }
 
 button {

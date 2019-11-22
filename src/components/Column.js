@@ -15,8 +15,10 @@ class Column extends Component {
             <Card
               key={card.id}
               card={card}
-              // onClickEditCard fait RÉFÉRENCE à la méthode handleClickEditCard() dans App
+              // onClickEditCard passe en props de Card la RÉFÉRENCE à la méthode handleEditCard() dans App
               onClickEditCard={this.props.onClickEditCard}
+              columnIndex={this.props.columnIndex}
+              cardIndex={this.props.column.cartes.indexOf(card)}
             />
           );
         })}

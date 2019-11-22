@@ -8,8 +8,14 @@ class Card extends Component {
         <h3>{this.props.card.question}</h3>
         <p>{this.props.card.reponse}</p>
         <button
-          // Au clique, fait RÉFÉRENCE directement à la méthode handleClickEditCard() dans App 
-          onClick={event => this.props.onClickEditCard(event, this.props.card)}
+          // Au clique, fait RÉFÉRENCE directement à la méthode handleEditCard() dans App
+          onClick={event =>
+            this.props.onClickEditCard(
+              event,
+              this.props.columnIndex,
+              this.props.cardIndex
+            )
+          }
         >
           Modifier
         </button>
