@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import Fetch from "./services/Fetch";
 import Nav from "./components/Nav";
 import Column from "./components/Column";
-// import Form from "./components/Form";
 import "./css/app.css";
 
 class App extends Component {
@@ -12,7 +11,8 @@ class App extends Component {
     terms: [],
     // On stocke les colums du terme sélectionné
     columns: [],
-    cardIsEditing: null
+    cardIsEditing: null,
+    cardIsCreating: null
   };
 
   // fetch correspond à this.fetch
@@ -90,6 +90,25 @@ class App extends Component {
     console.log("Dans failureCards");
   };
 
+  // En cas de succès de la modification de la carte
+  successAddCard = () => {
+    console.log("Dans successCreateReqEditCard");
+  };
+
+  // En cas d'échec de la modification de la carte
+  failureAddCard = () => {
+    console.log("Dans failureCreateReqEditCard");
+  };
+
+  // On manipule la création d'une carte
+  handleAddCard = (event, colonneIndex) => {
+    console.log("Dans handleAddCard");
+    console.log(colonneIndex);
+    
+    // On modifie cardIsCreating
+    this.setState({ cardIsCreating: this.state.terms[colonneIndex].id });
+  }
+
   // On manipule la modification de la carte cliquée
   handleEditCard = (event, columnIndex, cardIndex) => {
     console.log("Handle click edit card");
@@ -103,7 +122,17 @@ class App extends Component {
     });
   };
 
-  // Lorsque le formulaire est "submit"
+  // En cas de succès de la modification de la carte
+  successEditCard = () => {
+    console.log("Dans successCreateReqEditCard");
+  };
+  
+  // En cas d'échec de la modification de la carte
+  failureEditCard = () => {
+    console.log("Dans failureCreateReqEditCard");
+  };
+
+  // Lorsque le formulaire est soumis (envoyé)
   // preventDefault => Pour retirer le rechargement du formulaire quand il est submit
   handleSubmit = event => {
     event.preventDefault();
@@ -112,11 +141,56 @@ class App extends Component {
     // AUTRE MANIÈRE POUR setState (copie du state qui est comparé au state)
     // On fait une copie du state
     const copy_state = { ...this.state };
-    // On modifie la valeur de la propriété cardIsEditing de la copie du state quand on submit
+
+    // On récupère l'INDEX du terme sélectionné
+    // qui correspond au terme où se situe la carte à modifier
+    const termIndex = this.state.terms.findIndex(term => term.selected === true)
+    
+    // Fomulaire disparaît quand on clique sur la soumission du formulaire
     copy_state.cardIsEditing = false;
-    // Le state de cardIsEditing de la copie va être comparé au state de cardIsEditing en cours,
-    // si c'est différent il change le state par sa copie et appellera la méthode render()
-    this.setState(copy_state);
+    // Fomulaire disparaît quand on clique sur la soumission du formulaire
+    copy_state.cardIsCreating = false;
+
+    if (this.state.cardIsEditing) {
+      // Je destructure l'objet cardIsEditing pour utiliser plus rapidement ses propriétés
+      const { columnIndex, cardIndex } = this.state.cardIsEditing;
+
+      // On récupère la carte à modifier
+      const card = this.state.columns[columnIndex].cartes[cardIndex]
+
+      // Sauvegarde des données sur le serveur
+      // On envoie la modification de la carte sur le serveur
+      this.fetch.createReqEditCard(
+        card, // On passe la carte à modifier
+        this.state.terms[termIndex].id, // L'id du terme
+        this.successEditCard, // Callback en cas de succès
+        this.failureEditCard // Callback en cas d'échec
+      );
+
+      // Le state de cardIsEditing de la copie va être comparé au state de cardIsEditing en cours,
+      // si c'est différent il change le state par sa copie et appellera la méthode render()
+      this.setState(copy_state);
+    } else {
+      // Carte à créer
+      const card = {
+        colonne: this.state.cardIsCreating,
+        question: document.getElementById('question').value,
+        reponse: document.getElementById('reponse').value
+      }
+      
+      // console.log("Ajout carte", card);
+      
+      // On appelle la méthode createReqEditCard pour créer une carte
+      this.fetch.createReqAddCard(
+        card, // On passe la carte créée
+        this.state.terms[termIndex].id, // L'id du terme
+        this.successAddCard, // Callback en cas de succès
+        this.failureAddCard // Callback en cas d'échec
+      );
+
+      // Mets cardIsCreating à false
+      this.setState(copy_state);
+    }
   };
 
   // On change la question à changement de l'input question
@@ -139,10 +213,32 @@ class App extends Component {
 
   // Méthode qui renvoit un formulaire
   dumpForm = () => {
-    // Si cardIsEditing récupère la carte séléctionnée car on veut la modifier, alors on affiche le formulaire
-    if (this.state.cardIsEditing) {
-      // Je destructure l'objet cardIsEditing pour utiliser plus rapidement ses propriétés
-      const { columnIndex, cardIndex } = this.state.cardIsEditing;
+    // Affichage du formulaire pour modifier une carte ou en créer une
+    if (this.state.cardIsEditing || this.state.cardIsCreating) {
+      // Change l'input de la question en fonction de si on créé ou modifie une carte
+      const inputQuestion = this.state.cardIsEditing ?
+        // Input modification
+        (<input
+        type="text"
+        id="question"
+        value={this.state.columns[this.state.cardIsEditing.columnIndex].cartes[this.state.cardIsEditing.cardIndex].question}
+        onChange={event => this.handleChangeQuestion(event, "question")}/>)
+        // Input création
+        : (<input
+        type="text"
+        id="question"/>)
+
+      const inputReponse = this.state.cardIsEditing ?
+        // Input modification
+        (<input
+        type="text"
+        id="response"
+        value={this.state.columns[this.state.cardIsEditing.columnIndex].cartes[this.state.cardIsEditing.cardIndex].reponse}
+        onChange={event => this.handleChangeQuestion(event, "reponse")}/>)
+        // Input création
+         : (<input
+        type="text"
+        id="reponse"/>)
 
       // On retourne le formulaire quand on à une carte dans cardIsEditing
       return (
@@ -150,22 +246,12 @@ class App extends Component {
           {/* Input pour inscrire sa question */}
           <label htmlFor="question">
             Question
-            <input
-              type="text"
-              id="question"
-              value={this.state.columns[columnIndex].cartes[cardIndex].question}
-              onChange={event => this.handleChangeQuestion(event, "question")}
-            />
+            {inputQuestion}
           </label>
           {/* Input pour inscrire la réponse à la question */}
           <label htmlFor="response">
             Réponse
-            <input
-              type="text"
-              id="response"
-              value={this.state.columns[columnIndex].cartes[cardIndex].reponse}
-              onChange={event => this.handleChangeQuestion(event, "reponse")}
-            />
+            {inputReponse}
           </label>
           <input type="submit" value="Envoyer" />
         </form>
@@ -176,6 +262,7 @@ class App extends Component {
   render() {
     // Destructure le this.state pour créer des const d'élément qui sont dedans
     const { terms } = this.state;
+
     return (
       <div className="app">
         <header>
@@ -195,6 +282,8 @@ class App extends Component {
                 <Column
                   key={column.id}
                   column={column}
+                  // onClickCreateCard passe en props de Column la RÉFÉRENCE à la méthode "handleAddCard"
+                  onClickAddCard={this.handleAddCard}
                   // onClickEditCard passe en props de Column la RÉFÉRENCE à la méthode "handleEditCard"
                   onClickEditCard={this.handleEditCard}
                   columnIndex={this.state.columns.indexOf(column)}

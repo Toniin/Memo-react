@@ -6,7 +6,11 @@ class Column extends Component {
     return (
       <div className="col">
         <div className="col-header">
-          <button className="btn btn-success">+</button>
+          <button 
+            className="btn btn-success"
+            // Au clique, fait RÉFÉRENCE directement à la méthode handleCreateCard() dans App
+            onClick={event => this.props.onClickAddCard(event, this.props.columnIndex)}
+          >+</button>
           <h2>{this.props.column.name}</h2>
         </div>
         {/* On créé une nouvelle carte pour chaque cartes qui sont dans l'objet de la colonne */}
