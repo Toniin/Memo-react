@@ -5,6 +5,7 @@ class Nav extends Component {
   state = {};
 
   buttonClasses = selected => {
+    // Change la couleur du bouton en fonction de sa séléction
     const button_classes = selected ? "btn btn-secondary" : "btn btn-dark";
     return button_classes;
   };

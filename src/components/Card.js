@@ -3,7 +3,7 @@ import React, { Component } from "react";
 class Card extends Component {
   state = {};
 
-  // PETIT SOUCIS POUR LE COMPONENTDIDUPDATE
+  // PETIT SOUCIS POUR LE COMPONENTDIDUPDATE()
   // le prevProps est égale à la nouvelle prop donc ça ne fonctionne pas
   // Il faut que les deux props soient différentes
   // componentDidUpdate(prevProps) {

@@ -8,6 +8,10 @@ class Fetch {
     this.pwd = "antonin.chaudiere";
   }
 
+  /**
+   * @callback {getToken~success} Callback appelé en cas de réussite avec le token
+   * @callback {getToken~failure} Callback appelé en cas d'échec avec l'erreur
+   */
   // Récupère le token envoyé par le site
   getToken(success, failure) {
     fetch(this.url_basis + "/rest/session/token/")
@@ -32,6 +36,10 @@ class Fetch {
       });
   }
 
+  /**
+   * @callback {getTerms~success} Callback appelé en cas de réussite avec les termes
+   * @callback {getTerms~failure} Callback appelé en cas d'échec avec l'erreur
+   */
   // On va récupérer les termes pour les afficher dans la navbar du header
   getTerms = (success, failure) => {
     try {
@@ -70,6 +78,11 @@ class Fetch {
     }
   };
 
+  /**
+   * @callback {getCards~success} Callback appelé en cas de réussite avec les cartes de chaque colonnes
+   * @callback {getCards~failure} Callback appelé en cas d'échec avec l'erreur
+   * @params {number} Numéro de l'id du terme sélectionnée
+   */
   // On va récupérer les cartes pour chaque terme
   getCards = (success, failure, termId) => {
     // On récupère les cartes en fonction de l'utilisateur
@@ -113,6 +126,12 @@ class Fetch {
     });
   };
 
+  /**
+   * @params {object} Objet de la carte à modifier
+   * @params {number} Numéro de l'id du terme sélectionnée
+   * @callback {createReqEditCard~callbackSuccess} Callback appelé en cas de réussite avec l'id du terme
+   * @callback {createReqEditCard~callbackFailed} Callback appelé en cas d'échec avec l'erreur
+   */
   // Méthode qui permet de POST la modification d'une carte
   createReqEditCard = (
     card,
@@ -189,10 +208,16 @@ class Fetch {
     });
   };
 
+  /**
+   * @params {object} Objet de la carte à créer
+   * @params {number} Numéro de l'id du terme sélectionnée
+   * @callback {createReqAddCard~callbackSuccess} Callback appelé en cas de réussite avec l'id du terme
+   * @callback {createReqAddCard~callbackFailed} Callback appelé en cas d'échec avec l'erreur
+   */
   // Méthode qui permet de créer une carte
   createReqAddCard = (
     card,
-    themeid,
+    themeId,
     callbackSuccess,
     callbackFailed
   ) => {
@@ -201,7 +226,7 @@ class Fetch {
     // Je destructure l'objet card pour utiliser plus rapidement ses propriétés
     // J'ajoute un alias pour l'id de la carte et de la colonne pour rendre plus
     // lisible le code
-    const { question, reponse, colonne: colonneId } = card;
+    const { colonne: colonneId, question, reponse } = card;
 
     // création de la requête
     // utilisation de fetch
@@ -243,8 +268,8 @@ class Fetch {
         ],
         field_carte_thematique: [
           {
-            target_id: themeid,
-            url: "/taxonomy/term/" + themeid
+            target_id: themeId,
+            url: "/taxonomy/term/" + themeId
           }
         ],
         type: [
@@ -256,9 +281,9 @@ class Fetch {
     })
     .then(response => response.json())
     .then(data => {
-      console.log("data reçues le :", data.created[0].value);
-      if (data.created[0].value) {
-        callbackSuccess(themeid);
+      console.log("data reçues :", data);
+      if (data) {
+        callbackSuccess(themeId);
       } else {
         callbackFailed("Erreur de login ou de mot de passe");
       }

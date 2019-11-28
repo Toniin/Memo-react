@@ -22,6 +22,7 @@ class App extends Component {
   // Cette méthode est un hook du composant donc le this fais référence ici à la classe
   // même si c'est de type function() {}
   componentDidMount() {
+    // On créé une nouvelle instance
     this.fetch = new Fetch("http://www.coopernet.fr");
     // On va récupérer notre token
     this.fetch.getToken(this.successToken, this.failureToken);
@@ -56,6 +57,9 @@ class App extends Component {
     console.log("Dans failureTerms", error);
   };
 
+  /**
+   * @params {object} Objet des termes de la navbar
+   */
   // On manipule la récupération des cartes de l'utilisateur
   handleClickTerm = (event, term) => {
     // !!! ATTENTION À L'ORDRE DES PARAMÈTRES !!! (En haut du block car c'est asynchrone donc pas de soucis ;))
@@ -100,6 +104,9 @@ class App extends Component {
     console.log("Dans failureCreateReqEditCard");
   };
 
+  /**
+   * @params {number} Numéro d'index de la colonne sélectionnée
+   */
   // On manipule la création d'une carte
   handleAddCard = (event, colonneIndex) => {
     console.log("Dans handleAddCard");
@@ -109,6 +116,10 @@ class App extends Component {
     this.setState({ cardIsCreating: this.state.terms[colonneIndex].id });
   }
 
+  /**
+   * @params {number} Numéro d'index de la colonne sélectionnée
+   * @params {number} Numéro d'index de la carte sélectionnée
+   */
   // On manipule la modification de la carte cliquée
   handleEditCard = (event, columnIndex, cardIndex) => {
     console.log("Handle click edit card");
@@ -158,13 +169,19 @@ class App extends Component {
       // On récupère la carte à modifier
       const card = this.state.columns[columnIndex].cartes[cardIndex]
 
+      /**
+       * @params {object} Objet de la carte à modifier
+       * @params {number} Numéro d'id du terme sélectionné
+       * @callback {createReqEditCard~successEditCard} Callback appelé en cas de réussite
+       * @callback {createReqEditCard~failureEditCard} Callback appelé en cas d'échec
+       */
       // Sauvegarde des données sur le serveur
       // On envoie la modification de la carte sur le serveur
       this.fetch.createReqEditCard(
-        card, // On passe la carte à modifier
-        this.state.terms[termIndex].id, // L'id du terme
-        this.successEditCard, // Callback en cas de succès
-        this.failureEditCard // Callback en cas d'échec
+        card,
+        this.state.terms[termIndex].id,
+        this.successEditCard,
+        this.failureEditCard
       );
 
       // Le state de cardIsEditing de la copie va être comparé au state de cardIsEditing en cours,
@@ -178,14 +195,18 @@ class App extends Component {
         reponse: document.getElementById('reponse').value
       }
       
-      // console.log("Ajout carte", card);
-      
+      /**
+       * @params {object} Objet de la carte à créer
+       * @params {number} Numéro d'id du terme sélectionné
+       * @callback {createReqEditCard~successEditCard} Callback appelé en cas de réussite
+       * @callback {createReqEditCard~failureEditCard} Callback appelé en cas d'échec
+       */
       // On appelle la méthode createReqEditCard pour créer une carte
       this.fetch.createReqAddCard(
-        card, // On passe la carte créée
-        this.state.terms[termIndex].id, // L'id du terme
-        this.successAddCard, // Callback en cas de succès
-        this.failureAddCard // Callback en cas d'échec
+        card,
+        this.state.terms[termIndex].id,
+        this.successAddCard,
+        this.failureAddCard 
       );
 
       // Mets cardIsCreating à false
@@ -193,9 +214,11 @@ class App extends Component {
     }
   };
 
-  // On change la question à changement de l'input question
+  /**
+   * @params {string} Choix entre "question"/"reponse" pour modifier la bonne valeur
+   */
+  // On change la question au changement de l'input question
   handleChangeQuestion = (event, questionReponse) => {
-    console.log("Handle question, première carte");
     // Je destructure l'objet cardIsEditing pour utiliser plus rapidement ses propriétés
     const { columnIndex, cardIndex } = this.state.cardIsEditing;
 
